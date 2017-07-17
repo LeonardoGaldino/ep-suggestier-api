@@ -125,13 +125,17 @@ def fetch_num_eps(serie_name, season):
 		res.raise_for_status()
 
 def translate(input_str):
-	params = {
-		'key': GOOGLE_API_KEY,
-		'q': input_str,
-		'target': 'pt-br'
-	}
-	trans = json.loads(requests.get(GOOGLE_URL, params).content)
-	return trans['data']['translations'][0]['translatedText']
+    params = {
+        'key': GOOGLE_API_KEY,
+        'q': input_str,
+        'target': 'pt-br'
+    }
+    try:
+		res = requests.get(GOOGLE_URL, params)
+    except:
+		raise StopIteration('timeout')
+    trans = json.loads(res.content)
+    return trans['data']['translations'][0]['translatedText']
 
 @require_http_methods(['GET'])
 def v_random_ep2(request):
@@ -140,7 +144,7 @@ def v_random_ep2(request):
 		name_serie = request.GET['serie_name'].upper()
 		serie = Serie.objects.filter(title=name_serie)
 		if len(serie) < 1:
-			return HttpResponseRedirect('http://localhost:8000/random/?serie_name='+name_serie)
+			return HttpResponseRedirect('/random/?serie_name='+name_serie)
 		serie = serie[0]
 		n_season = randint(0, len(serie.seasons)-1)
 		season = serie.seasons[n_season]
@@ -183,7 +187,7 @@ def v_random_ep(request):
 		num_eps = fetch_num_eps(serie_name, selected_season)
 		selected_ep = random_number(1, num_eps)
 		ep_info = fetch_ep_info(serie_name, selected_season, selected_ep)
-		#ep_info['spoiler'] = translate(ep_info['spoiler'])
+		ep_info['spoiler'] = translate(ep_info['spoiler'])
 		ep_info['poster'] = poster
 		ep_info['Response'] = True
 		if serie_name in special_series.keys():

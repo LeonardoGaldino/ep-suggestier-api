@@ -90,7 +90,10 @@ class Command(BaseCommand):
             'season': season,
             'type': 'series'
         }
-        res = requests.get(self.OMDB_URL, params=params)
+        try:
+            res = requests.get(self.OMDB_URL, params=params)
+        except
+            raise StopIteration('timeout')
         if res.ok:
             return len(json.loads(res.content)['Episodes'])
         else:
@@ -105,7 +108,11 @@ class Command(BaseCommand):
             'q': self.input_str,
             'target': 'pt-br'
         }
-        trans = json.loads(requests.get(self.GOOGLE_URL, params).content)
+        try:
+            res = requests.get(self.GOOGLE_URL, params)
+        except:
+            raise StopIteration('timeout')
+        trans = json.loads(res.content)
         return trans['data']['translations'][0]['translatedText']
 
     def populate_work(self):
